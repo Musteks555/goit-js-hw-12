@@ -174,15 +174,6 @@ async function loadMore() {
 
     renderImages(hits);
     updateModal();
-
-    const cardHeight = document
-      .querySelectorAll('.gallery-item:last-child')[0]
-      .getBoundingClientRect();
-
-    window.scrollTo({
-      top: cardHeight.y + cardHeight.height * 2,
-      behavior: 'smooth',
-    });
   } catch (error) {
     console.log(error);
   } finally {
@@ -201,6 +192,19 @@ async function loadMore() {
       refs.loadMoreBtn.removeEventListener('click', loadMore);
     } else {
       refs.loadMoreBtn.classList.remove('is-hidden');
+
+      const cardHeight = document
+        .querySelectorAll('.gallery-item:last-child')[0]
+        .getBoundingClientRect().height;
+      const btnPosition = refs.loadMoreBtn.getBoundingClientRect().y;
+
+      console.log(cardHeight);
+      console.log(btnPosition);
+
+      window.scrollTo({
+        top: btnPosition + cardHeight * 2,
+        behavior: 'smooth',
+      });
     }
 
     refs.loader.classList.remove('show');
