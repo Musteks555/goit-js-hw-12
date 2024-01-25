@@ -197,13 +197,9 @@ async function loadMore() {
     const cardHeight = document
       .querySelector('.gallery-item')
       .getBoundingClientRect().height;
-    const btnPosition = refs.loadMoreBtn.getBoundingClientRect().y;
 
-    console.log(cardHeight);
-    console.log(btnPosition);
-
-    window.scrollTo({
-      top: btnPosition + cardHeight * 2,
+    window.scrollBy({
+      top: cardHeight * 2,
       behavior: 'smooth',
     });
   }
