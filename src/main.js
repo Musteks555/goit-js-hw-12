@@ -177,36 +177,36 @@ async function loadMore() {
   } catch (error) {
     console.log(error);
   } finally {
-    if (queryParams.page === queryParams.maxPage) {
-      iziToast.show({
-        message: `We're sorry, but you've reached the end of search results.`,
-        messageColor: '#000',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        color: '#6C8CFF',
-        position: 'topRight',
-        icon: 'icon-info',
-        iconColor: '#000',
-      });
-
-      refs.loadMoreBtn.removeEventListener('click', loadMore);
-    } else {
-      refs.loadMoreBtn.classList.remove('is-hidden');
-
-      const cardHeight = document
-        .querySelector('.gallery-item')
-        .getBoundingClientRect().height;
-      const btnPosition = refs.loadMoreBtn.getBoundingClientRect().y;
-
-      console.log(cardHeight);
-      console.log(btnPosition);
-
-      window.scrollTo({
-        top: btnPosition + cardHeight * 2,
-        behavior: 'smooth',
-      });
-    }
-
     refs.loader.classList.remove('show');
+  }
+
+  if (queryParams.page === queryParams.maxPage) {
+    iziToast.show({
+      message: `We're sorry, but you've reached the end of search results.`,
+      messageColor: '#000',
+      messageSize: '16px',
+      messageLineHeight: '24px',
+      color: '#6C8CFF',
+      position: 'topRight',
+      icon: 'icon-info',
+      iconColor: '#000',
+    });
+
+    refs.loadMoreBtn.removeEventListener('click', loadMore);
+  } else {
+    refs.loadMoreBtn.classList.remove('is-hidden');
+
+    const cardHeight = document
+      .querySelector('.gallery-item')
+      .getBoundingClientRect().height;
+    const btnPosition = refs.loadMoreBtn.getBoundingClientRect().y;
+
+    console.log(cardHeight);
+    console.log(btnPosition);
+
+    window.scrollTo({
+      top: btnPosition + cardHeight * 2,
+      behavior: 'smooth',
+    });
   }
 }
