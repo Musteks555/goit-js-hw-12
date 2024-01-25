@@ -4,10 +4,19 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
+import axios from 'axios';
+
 const gallery = document.querySelector('.gallery-container');
 const form = document.querySelector('.form');
 const input = form.querySelector('.input-search');
+const searchBtn = form.querySelector('.btn-search');
 const loader = document.querySelector('.loader');
+const loadMoreBtn = document.querySelector('.btn-load-more');
+
+let query = '';
+let page = 1;
+const per_page = 40;
+let maxPage = 0;
 
 const lightbox = new SimpleLightbox('.gallery-link', {
   captions: true,
@@ -19,11 +28,13 @@ const lightbox = new SimpleLightbox('.gallery-link', {
 
 form.addEventListener('submit', imageSearch);
 
-function imageSearch(e) {
+async function imageSearch(e) {
   e.preventDefault();
 
   gallery.innerHTML = '';
   loader.classList.add('show');
+  searchBtn.disabled = true;
+  loadMoreBtn.classList.add('is-hidden');
 
   const toast = document.querySelector('.iziToast');
   if (toast) {
@@ -35,50 +46,62 @@ function imageSearch(e) {
     );
   }
 
-  const searchWord = input.value;
-  input.value = '';
+  query = input.value.trim();
 
-  const searchParams = new URLSearchParams({
+  if (!query) {
+    return;
+  }
+
+  try {
+    const { hits, totalHits } = await fetchImages(query);
+
+    maxPage = Math.ceil(totalHits / per_page);
+
+    renderImages(hits);
+
+    if (hits.length && hits.length !== totalHits) {
+      updateModal();
+
+      loadMoreBtn.classList.remove('is-hidden');
+      loadMoreBtn.addEventListener('click', loadMore);
+    } else if (!hits.length) {
+      iziToast.show({
+        message: `Sorry, there are no images matching your search query. Please, try again!`,
+        messageColor: '#FAFAFB',
+        messageSize: '16px',
+        messageLineHeight: '24px',
+        color: '#EF4040',
+        progressBarColor: '#B51B1B',
+        position: 'topRight',
+        icon: 'icon-cancel',
+        iconColor: '#FAFAFB',
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loader.classList.remove('show');
+
+    form.reset();
+
+    searchBtn.disabled = false;
+  }
+}
+
+async function fetchImages(searchWord) {
+  const params = {
     key: '41767472-d86fe691fef3335ff5b770a4f',
     q: `${searchWord}`,
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-  });
-  const url = `https://pixabay.com/api/?${searchParams}`;
+    page,
+    per_page,
+  };
 
-  fetchImages(url)
-    .then(images => {
-      if (images.hits.length) {
-        renderImages(images.hits);
+  const url = `https://pixabay.com/api/`;
 
-        updateModal();
-      } else {
-        iziToast.show({
-          message: `Sorry, there are no images matching your search query. Please, try again!`,
-          messageColor: '#FAFAFB',
-          messageSize: '16px',
-          messageLineHeight: '24px',
-          color: '#EF4040',
-          progressBarColor: '#B51B1B',
-          position: 'topRight',
-          icon: 'icon-cancel',
-          iconColor: '#FAFAFB',
-        });
-      }
-    })
-    .catch(error => console.log(error))
-    .finally(() => loader.classList.remove('show'));
-}
-
-function fetchImages(url) {
-  return fetch(url).then(response => {
-    if (!response.ok) {
-      throw new Error(response.status);
-    }
-
-    return response.json();
-  });
+  return axios.get(`${url}`, { params }).then(({ data }) => data);
 }
 
 function renderImages(images) {
@@ -94,7 +117,7 @@ function renderImages(images) {
         downloads,
       }) => {
         return `
-            <div class="gallery-item">
+            <li class="gallery-item">
                 <a href="${largeImageURL}" class="gallery-link">
                     <img src="${webformatURL}" alt="${tags}" data-source="${largeImageURL}">
                 </a>
@@ -120,7 +143,7 @@ function renderImages(images) {
                         <p class="gallery-info-value">${downloads}</p>
                     </li>
                 </ul>
-            </div>
+            </li>
       `;
       }
     )
@@ -131,4 +154,27 @@ function renderImages(images) {
 
 function updateModal() {
   lightbox.refresh();
+}
+
+async function loadMore() {
+  page += 1;
+
+  loader.classList.add('show');
+  loadMoreBtn.classList.add('is-hidden');
+
+  try {
+    const { hits } = await fetchImages(query);
+
+    renderImages(hits);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    if (page === maxPage) {
+      loadMoreBtn.removeEventListener('click', loadMore);
+    } else {
+      loadMoreBtn.classList.remove('is-hidden');
+    }
+
+    loader.classList.remove('show');
+  }
 }
