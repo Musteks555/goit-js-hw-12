@@ -29,6 +29,7 @@ const lightbox = new SimpleLightbox('.gallery-link', {
 });
 
 refs.form.addEventListener('submit', imageSearch);
+refs.loadMoreBtn.addEventListener('click', loadMore);
 
 async function imageSearch(e) {
   e.preventDefault();
@@ -68,7 +69,6 @@ async function imageSearch(e) {
 
     if (hits.length && hits.length !== totalHits) {
       refs.loadMoreBtn.classList.remove('is-hidden');
-      refs.loadMoreBtn.addEventListener('click', loadMore);
     } else if (!hits.length) {
       iziToast.show({
         message: `Sorry, there are no images matching your search query. Please, try again!`,
@@ -191,8 +191,6 @@ async function loadMore() {
       icon: 'icon-info',
       iconColor: '#000',
     });
-
-    refs.loadMoreBtn.removeEventListener('click', loadMore);
   } else {
     refs.loadMoreBtn.classList.remove('is-hidden');
 
