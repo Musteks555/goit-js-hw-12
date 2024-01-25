@@ -24,7 +24,7 @@ body {
 
   gap: 32px;
 
-  padding: 36px 16px 0;
+  padding: 36px 16px;
 }
 
 .form {
@@ -113,6 +113,10 @@ body {
   background-image: url(../img/alert-cancel.svg);
 }
 
+.icon-info {
+  background-image: url(../img/alert-info.svg);
+}
+
 .gallery-container {
   display: flex;
   flex-wrap: wrap;
@@ -122,7 +126,6 @@ body {
 
 .gallery-item {
   width: calc((100% - 48px) / 3);
-  min-height: 350px;
 
   border-radius: 4px;
   border: 1px solid #000;
@@ -139,11 +142,15 @@ body {
 }
 
 .gallery-link {
-  height: -webkit-fill-available;
+  height: 375px;
+
+  overflow: hidden;
 }
 
 .gallery-link img {
   border-radius: 4px 4px 0 0;
+
+  object-fit: cover;
 }
 
 .gallery-info-container {

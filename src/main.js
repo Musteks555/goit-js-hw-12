@@ -6,17 +6,19 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 import axios from 'axios';
 
-const gallery = document.querySelector('.gallery-container');
-const form = document.querySelector('.form');
-const input = form.querySelector('.input-search');
-const searchBtn = form.querySelector('.btn-search');
-const loader = document.querySelector('.loader');
-const loadMoreBtn = document.querySelector('.btn-load-more');
+const refs = {
+  gallery: document.querySelector('.gallery-container'),
+  form: document.querySelector('.form'),
+  loader: document.querySelector('.loader'),
+  loadMoreBtn: document.querySelector('.btn-load-more'),
+};
 
-let query = '';
-let page = 1;
-const per_page = 40;
-let maxPage = 0;
+const queryParams = {
+  query: '',
+  page: 1,
+  maxPage: 0,
+  per_page: 40,
+};
 
 const lightbox = new SimpleLightbox('.gallery-link', {
   captions: true,
@@ -26,15 +28,20 @@ const lightbox = new SimpleLightbox('.gallery-link', {
   captionsData: 'alt',
 });
 
-form.addEventListener('submit', imageSearch);
+refs.form.addEventListener('submit', imageSearch);
 
 async function imageSearch(e) {
   e.preventDefault();
 
-  gallery.innerHTML = '';
-  loader.classList.add('show');
+  const form = e.currentTarget;
+
+  const input = form.elements.query;
+  const searchBtn = form.elements.searchBtn;
+
+  refs.gallery.innerHTML = '';
+  refs.loader.classList.add('show');
   searchBtn.disabled = true;
-  loadMoreBtn.classList.add('is-hidden');
+  refs.loadMoreBtn.classList.add('is-hidden');
 
   const toast = document.querySelector('.iziToast');
   if (toast) {
@@ -46,24 +53,23 @@ async function imageSearch(e) {
     );
   }
 
-  query = input.value.trim();
+  refs.query = input.value.trim();
 
-  if (!query) {
+  if (!refs.query) {
     return;
   }
 
   try {
-    const { hits, totalHits } = await fetchImages(query);
+    const { hits, totalHits } = await fetchImages(refs.query);
 
-    maxPage = Math.ceil(totalHits / per_page);
+    queryParams.maxPage = Math.ceil(totalHits / queryParams.per_page);
 
     renderImages(hits);
+    updateModal();
 
     if (hits.length && hits.length !== totalHits) {
-      updateModal();
-
-      loadMoreBtn.classList.remove('is-hidden');
-      loadMoreBtn.addEventListener('click', loadMore);
+      refs.loadMoreBtn.classList.remove('is-hidden');
+      refs.loadMoreBtn.addEventListener('click', loadMore);
     } else if (!hits.length) {
       iziToast.show({
         message: `Sorry, there are no images matching your search query. Please, try again!`,
@@ -80,7 +86,7 @@ async function imageSearch(e) {
   } catch (error) {
     console.log(error);
   } finally {
-    loader.classList.remove('show');
+    refs.loader.classList.remove('show');
 
     form.reset();
 
@@ -95,8 +101,8 @@ async function fetchImages(searchWord) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    page,
-    per_page,
+    page: queryParams.page,
+    per_page: queryParams.per_page,
   };
 
   const url = `https://pixabay.com/api/`;
@@ -149,7 +155,7 @@ function renderImages(images) {
     )
     .join('');
 
-  gallery.insertAdjacentHTML('beforeend', markup);
+  refs.gallery.insertAdjacentHTML('beforeend', markup);
 }
 
 function updateModal() {
@@ -157,24 +163,36 @@ function updateModal() {
 }
 
 async function loadMore() {
-  page += 1;
+  queryParams.page += 1;
 
-  loader.classList.add('show');
-  loadMoreBtn.classList.add('is-hidden');
+  refs.loader.classList.add('show');
+  refs.loadMoreBtn.classList.add('is-hidden');
 
   try {
-    const { hits } = await fetchImages(query);
+    const { hits } = await fetchImages(queryParams.query);
 
     renderImages(hits);
+    updateModal();
   } catch (error) {
     console.log(error);
   } finally {
-    if (page === maxPage) {
-      loadMoreBtn.removeEventListener('click', loadMore);
+    if (queryParams.page === queryParams.maxPage) {
+      iziToast.show({
+        message: `We're sorry, but you've reached the end of search results.`,
+        messageColor: '#000',
+        messageSize: '16px',
+        messageLineHeight: '24px',
+        color: '#6C8CFF',
+        position: 'topRight',
+        icon: 'icon-info',
+        iconColor: '#000',
+      });
+
+      refs.loadMoreBtn.removeEventListener('click', loadMore);
     } else {
-      loadMoreBtn.classList.remove('is-hidden');
+      refs.loadMoreBtn.classList.remove('is-hidden');
     }
 
-    loader.classList.remove('show');
+    refs.loader.classList.remove('show');
   }
 }
