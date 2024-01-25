@@ -173,6 +173,15 @@ async function loadMore() {
 
     renderImages(hits);
     updateModal();
+
+    const cardHeight = document
+      .querySelectorAll('.gallery-item:last-child')[0]
+      .getBoundingClientRect();
+
+    window.scrollTo({
+      top: cardHeight.y + cardHeight.height * 2,
+      behavior: 'smooth',
+    });
   } catch (error) {
     console.log(error);
   } finally {
