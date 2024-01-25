@@ -194,7 +194,7 @@ async function loadMore() {
       refs.loadMoreBtn.classList.remove('is-hidden');
 
       const cardHeight = document
-        .querySelectorAll('.gallery-item:last-child')[0]
+        .querySelector('.gallery-item')
         .getBoundingClientRect().height;
       const btnPosition = refs.loadMoreBtn.getBoundingClientRect().y;
 
