@@ -41,6 +41,7 @@ async function imageSearch(e) {
   refs.gallery.innerHTML = '';
   refs.loader.classList.add('show');
   searchBtn.disabled = true;
+  refs.query = input.value.trim();
   refs.loadMoreBtn.classList.add('is-hidden');
 
   const toast = document.querySelector('.iziToast');
@@ -52,8 +53,6 @@ async function imageSearch(e) {
       toast
     );
   }
-
-  refs.query = input.value.trim();
 
   if (!refs.query) {
     return;
@@ -91,6 +90,8 @@ async function imageSearch(e) {
     form.reset();
 
     searchBtn.disabled = false;
+
+    queryParams.page = 1;
   }
 }
 
